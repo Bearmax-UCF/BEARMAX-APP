@@ -11,6 +11,7 @@ export default function Loading( {navigation} ) {
         />
 
         <Text style={styles.assist}>Place Holder for Bearmax STT</Text>
+
         <View style={styles.container2}>
           <Pressable style={styles.button} >
             <Text style={styles.text}>Calibrate</Text>
@@ -21,12 +22,14 @@ export default function Loading( {navigation} ) {
           </Pressable>
         </View>
 
-        <Pressable style={styles.button} >
+        <View style={styles.container2}>
+          <Pressable style={styles.button1} >
             <Text style={styles.text}>Help</Text>
-        </Pressable>
-        <Pressable style={styles.button1} >
+          </Pressable>
+          <Pressable style={styles.button} >
             <Text style={styles.text}>Engage</Text>
-        </Pressable>
+          </Pressable>
+        </View>
     </View>
   );
 }
@@ -38,29 +41,32 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   container2: {
-    flex
+    flexDirection: 'row',
+    marginTop: 20,
   },
   logo: {
-    width: 200, 
-    height: 200,
+    width: 250, 
+    height: 250,
     marginTop: 50,
   },
   button: {
     backgroundColor: '#56b19c',
     paddingVertical: 40,
-    width: 200,
+    width: 180,
     height: 100,
     borderRadius: 4,
     elevation: 3,
+    marginRight: 8,
     
   },
   button1: {
     backgroundColor: '#35604e',
     paddingVertical: 40,
     height: 100,
-    width: 200,
+    width: 180,
     borderRadius: 4,
     elevation: 3,
+    marginRight: 8,
   },
   text: {
     fontSize: 16,
@@ -76,7 +82,8 @@ const styles = StyleSheet.create({
     height: 50,
     textAlign: 'center',
     paddingVertical: 15,
-    marginTop: 30,
+    marginTop: 50,
+
     fontSize: 16,
     lineHeight: 21,
     fontWeight: 'bold',
