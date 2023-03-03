@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import Loading from "./Screens/Load";
+import Load from "./Screens/Load";
 import Main from "./Screens/Main";
 
 const Stack = createStackNavigator();
@@ -12,7 +12,7 @@ export default function App() {
       <Stack.Navigator screenOptions={{headerShown: false}}>
         <Stack.Screen 
           name="Load"
-          component={Loading}
+          component={Load}
         />
         <Stack.Screen 
           name="Main"
