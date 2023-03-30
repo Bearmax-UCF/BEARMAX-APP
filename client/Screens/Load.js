@@ -1,8 +1,39 @@
 import { StatusBar } from 'expo-status-bar';
+import { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Image, Pressable} from 'react-native';
+
+import { io } from "socket.io-client";
 
 
 export default function Loading( {navigation} ) {
+  const [socket, setSocket] = useState(null);
+
+  useEffect(() => {
+    const socket = io.connect("https://localhost:8080");
+
+    // Not sure how necassary this part is.
+    newsocket.on('connect', msg => { // connect not connection
+      console.log('joined.')
+      setMessage(messages=>messages.concat(msg));
+      setSocket(newSocket);
+    });
+
+    socket.on("speak", (msg: string) => console.log("Robot says: '" + msg + "'"))
+
+    // Closes out socket, may need be moved???
+    return () => newSocket.close();
+  }, [route, navigation]);
+
+  const emotionGame = async (event) => {
+    
+  }
+
+  const calibrate = async (event) => {
+
+  }
+
+
+  
   return (
     <View style={styles.container}>
         <Image 
@@ -13,11 +44,11 @@ export default function Loading( {navigation} ) {
         <Text style={styles.assist}>Place Holder for Bearmax STT</Text>
 
         <View style={styles.container2}>
-          <Pressable style={styles.button} >
+          <Pressable style={styles.button} onPress={calibrate} >
             <Text style={styles.text}>Calibrate</Text>
           </Pressable>
 
-          <Pressable style={styles.button1} >
+          <Pressable style={styles.button1} onPress={emotionGame}>
             <Text style={styles.text}>Emotion Recognition</Text>
           </Pressable>
         </View>
