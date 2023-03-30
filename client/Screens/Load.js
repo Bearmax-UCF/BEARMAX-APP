@@ -18,18 +18,33 @@ export default function Loading( {navigation} ) {
       setSocket(newSocket);
     });
 
+    // "(msg: string)" is giving errors at the moment so i am just commenting it out for lil
     //socket.on("speak", (msg: string) => console.log("Robot says: '" + msg + "'"))
 
     // Closes out socket, may need be moved???
     return () => newSocket.close();
   }, [route, navigation]);
 
+  // did same from simons socket test for the web.
   const emotionGame = async (event) => {
-    
+    socket.emit("emotionGame", "start");
+    setTimeout(() => socket.emit("emotionGame", "stop"), 500)
+    setTimeout(() => socket.emit("recalibrate"), 1000)
+    setTimeout(() => {
+      const stats = {
+        Correct: [10, 3, 4, 9],
+        Wrong: [8, 3, 4, 1],
+        NumPlays: 42,
+        UserID: "notarealid",
+      }
+      const statsJSON = JSON.stringify(stats)
+      console.log("Sending:", statsJSON)
+      socket.emit("emotionGameStats", statsJSON)
+    }, 1500)
   }
 
   const calibrate = async (event) => {
-
+    socket.emit("recalibrate")
   }
 
 
