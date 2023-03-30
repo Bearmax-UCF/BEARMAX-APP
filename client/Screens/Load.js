@@ -18,7 +18,7 @@ export default function Loading( {navigation} ) {
       setSocket(newSocket);
     });
 
-    socket.on("speak", (msg: string) => console.log("Robot says: '" + msg + "'"))
+    //socket.on("speak", (msg: string) => console.log("Robot says: '" + msg + "'"))
 
     // Closes out socket, may need be moved???
     return () => newSocket.close();
