@@ -1,126 +1,176 @@
-import { StatusBar } from 'expo-status-bar';
-import { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Image, Pressable} from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { useState, useEffect, useRef } from "react";
+import { StyleSheet, Text, View, Image, Pressable } from "react-native";
 
 import { io } from "socket.io-client";
 
+export default function Loading({ navigation }) {
+	const [gameActive, setGameActive] = useState(false);
+	const [currentText, setCurrentText] = useState("");
+	const [socket, setSocket] = useState(null);
+	const [msgQueue, setMsgQueue] = useState(["Welcome to BEARMAX!"]);
 
-export default function Loading( {navigation} ) {
-  const [socket, setSocket] = useState(null);
-  var [subtitle, setSubtitle] = useState(null);
+	const queueRef = useRef();
+	queueRef.current = msgQueue;
+	const text = useRef();
+	text.current = currentText;
+	const count = useRef(0);
 
-  useEffect(() => {
-    const socket = io.connect("https://localhost:8080");
+	// TODO: Make less gross
+	useEffect(() => {
+		const interval = setInterval(() => {
+			const LEAVE_DUR = 4; // sec
+			const currentQueue = queueRef.current;
 
-    // Not sure how necassary this part is.
-    /* newsocket.on('connect', msg => { // connect not connection
-      console.log('joined.')
-      setMessage(messages=>messages.concat(msg));
-      setSocket(newSocket);
-    });*/
+			if (count.current > 0)
+				count.current = (count.current + 1) % (LEAVE_DUR + 1);
+			if (count.current == 0) {
+				if (currentQueue.length == 0) {
+					if (text.current !== "") setCurrentText("");
+					return;
+				}
+				setCurrentText(currentQueue[0]);
+				currentQueue.splice(0, 1);
+				setMsgQueue(currentQueue);
+				count.current++;
+			}
+		}, 1000);
 
-    // socket.on("speak", msg => console.log("Robot says: '" + msg + "'"))
-    socket.on("speak", msg => setSubtitle(msg))
+		return () => clearInterval(interval);
+	}, []);
 
-  });
+	useEffect(
+		() => {
+			const URL = "http://137.184.110.53:443" ?? "http://localhost:8080";
 
-  
-  const emotionGame = async (event) => {
-    socket.emit("emotionGame", "start");
-  }
+			console.log("Attempting to connect to " + URL);
+			const newSocket = io(URL); // TODO: Fix with HTTPS
 
-  const calibrate = async (event) => {
-    socket.emit("recalibrate")
-  }
+			newSocket.on("connect", () => {
+				console.log("Successfully connected to the server.");
+				setSocket(newSocket);
 
+				newSocket.on("speak", (newMsg) => {
+					console.log("Received speech: " + newMsg);
+					const newQueue = [...queueRef.current, newMsg];
+					console.log(
+						"Adding new message to queue, which is now: ",
+						newQueue
+					);
+					setMsgQueue(newQueue);
+				});
+			});
 
-  
-  return (
-    <View style={styles.container}>
-        <Image 
-            style={styles.logo}
-            source={require('./../assets/face.png')} 
-        />
+			return () => {
+				console.log("Disconnecting socket");
+				newSocket.close();
+			};
+		},
+		[
+			/*navigation*/
+		]
+	);
 
-        <Text style={styles.assist}>Place Holder for Bearmax STT</Text>
+	const emotionGame = () => {
+		if (!socket) return;
+		if (gameActive) socket.emit("emotionGame", "stop");
+		else socket.emit("emotionGame", "start");
+		setGameActive(!gameActive);
+	};
 
-        <View style={styles.container2}>
-          <Pressable style={styles.button} onPress={calibrate} >
-            <Text style={styles.text}>Calibrate</Text>
-          </Pressable>
+	const calibrate = () => {
+		if (!socket) return;
+		socket.emit("recalibrate");
+	};
 
-          <Pressable style={styles.button1} onPress={emotionGame}>
-            <Text style={styles.text}>Emotion Recognition</Text>
-          </Pressable>
-        </View>
+	// TODO: Test queue
+	const testSpeech = () => {};
 
-        <View style={styles.container2}>
-          <Pressable style={styles.button1} >
-            <Text style={styles.text}>Help</Text>
-          </Pressable>
-          <Pressable style={styles.button} >
-            <Text style={styles.text}>Engage</Text>
-          </Pressable>
-        </View>
-    </View>
-  );
+	return (
+		<View style={styles.container}>
+			<Image
+				style={styles.logo}
+				source={require("./../assets/face.png")}
+			/>
+
+			<Text style={styles.assist}>{currentText}</Text>
+
+			<View style={styles.container2}>
+				<Pressable style={styles.button} onPress={calibrate}>
+					<Text style={styles.text}>Calibrate</Text>
+				</Pressable>
+
+				<Pressable style={styles.button1} onPress={emotionGame}>
+					<Text style={styles.text}>
+						{gameActive ? "Stop Game" : "Play!"}
+					</Text>
+				</Pressable>
+			</View>
+
+			<View style={styles.container2}>
+				<Pressable style={styles.button1}>
+					<Text style={styles.text}>Help</Text>
+				</Pressable>
+				<Pressable style={styles.button}>
+					<Text style={styles.text}>Engage</Text>
+				</Pressable>
+			</View>
+		</View>
+	);
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#856A5d',
-    alignItems: 'center'
-  },
-  container2: {
-    flexDirection: 'row',
-    marginTop: 20,
-  },
-  logo: {
-    width: 250, 
-    height: 250,
-    marginTop: 50,
-  },
-  button: {
-    backgroundColor: '#56b19c',
-    paddingVertical: 40,
-    width: 180,
-    height: 100,
-    borderRadius: 4,
-    elevation: 3,
-    marginRight: 8,
-    
-  },
-  button1: {
-    backgroundColor: '#35604e',
-    paddingVertical: 40,
-    height: 100,
-    width: 180,
-    borderRadius: 4,
-    elevation: 3,
-    marginRight: 8,
-  },
-  text: {
-    fontSize: 16,
-    lineHeight: 21,
-    fontWeight: 'bold',
-    letterSpacing: 0.25,
-    color: 'white',
-    textAlign: 'center'
-  },
-  assist: {
-    backgroundColor: '#60463b',
-    width: 365,
-    height: 50,
-    textAlign: 'center',
-    paddingVertical: 15,
-    marginTop: 50,
+	container: {
+		flex: 1,
+		backgroundColor: "#856A5d",
+		alignItems: "center",
+	},
+	container2: {
+		flexDirection: "row",
+		marginTop: 20,
+	},
+	logo: {
+		width: 250,
+		height: 250,
+		marginTop: 50,
+	},
+	button: {
+		backgroundColor: "#56b19c",
+		paddingVertical: 40,
+		width: 180,
+		height: 100,
+		borderRadius: 4,
+		elevation: 3,
+		marginRight: 8,
+	},
+	button1: {
+		backgroundColor: "#35604e",
+		paddingVertical: 40,
+		height: 100,
+		width: 180,
+		borderRadius: 4,
+		elevation: 3,
+		marginRight: 8,
+	},
+	text: {
+		fontSize: 16,
+		lineHeight: 21,
+		fontWeight: "bold",
+		letterSpacing: 0.25,
+		color: "white",
+		textAlign: "center",
+	},
+	assist: {
+		backgroundColor: "#60463b",
+		width: 365,
+		height: 50,
+		textAlign: "center",
+		paddingVertical: 15,
+		marginTop: 50,
 
-    fontSize: 16,
-    lineHeight: 21,
-    fontWeight: 'bold',
-    letterSpacing: 0.25,
-    color: 'white',
-  },
+		fontSize: 16,
+		lineHeight: 21,
+		fontWeight: "bold",
+		letterSpacing: 0.25,
+		color: "white",
+	},
 });
