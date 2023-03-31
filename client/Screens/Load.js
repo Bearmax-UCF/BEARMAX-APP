@@ -1,5 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { StyleSheet, Text, View, Image, Pressable } from "react-native";
+import {
+	StyleSheet,
+	Text,
+	View,
+	Image,
+	Pressable,
+	Animated,
+} from "react-native";
 
 import { io } from "socket.io-client";
 
@@ -7,7 +14,7 @@ export default function Loading({ navigation }) {
 	const [gameActive, setGameActive] = useState(false);
 	const [currentText, setCurrentText] = useState("");
 	const [socket, setSocket] = useState(null);
-	const [msgQueue, setMsgQueue] = useState(["Welcome to BEARMAX!"]);
+	const [msgQueue, setMsgQueue] = useState(["Hello from BEARMAX!"]);
 
 	const queueRef = useRef();
 	queueRef.current = msgQueue;
@@ -95,7 +102,6 @@ export default function Loading({ navigation }) {
 				style={styles.logo}
 				source={require("./../assets/face.png")}
 			/>
-
 			<Text style={styles.assist}>{currentText}</Text>
 
 			<View style={styles.container2}>
