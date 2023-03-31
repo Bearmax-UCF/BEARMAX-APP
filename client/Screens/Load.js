@@ -52,13 +52,17 @@ export default function Loading({ navigation }) {
 				newSocket.on("speak", (newMsg) => {
 					console.log("Received speech: " + newMsg);
 					const newQueue = [...queueRef.current, newMsg];
-					console.log(
-						"Adding new message to queue, which is now: ",
-						newQueue
-					);
+					// console.log(
+					// 	"Adding new message to queue, which is now: ",
+					// 	newQueue
+					// );
 					setMsgQueue(newQueue);
 				});
 			});
+
+			newSocket.on("disconnect", () =>
+				console.log("Socket disconnected")
+			);
 
 			return () => {
 				console.log("Disconnecting socket");
