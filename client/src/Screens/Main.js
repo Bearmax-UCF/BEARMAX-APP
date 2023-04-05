@@ -36,10 +36,10 @@ const styles = StyleSheet.create({
 		borderWidth: 2,
 		marginTop: 60,
 		padding: 5,
-		borderRadius: 10,
+		borderRadius: 5,
 	},
 	text: {
-		color: "#000000",
+		color: "#FFFFFF",
 		fontSize: 24,
 	},
 });

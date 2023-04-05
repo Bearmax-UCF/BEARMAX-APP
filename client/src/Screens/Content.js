@@ -9,11 +9,7 @@ import {
 } from "react-native";
 
 import { io } from "socket.io-client";
-
-const buttonLight = "#56b19c";
-const buttonLightActive = "#4ca490";
-const buttonDark = "#35604e";
-const buttonDarkActive = "#2b4f40";
+import { Colors } from "../utils/Colors";
 
 export default function Content({ navigation }) {
 	const [gameActive, setGameActive] = useState(false);
@@ -21,10 +17,10 @@ export default function Content({ navigation }) {
 	const [socket, setSocket] = useState(null);
 	const [msgQueue, setMsgQueue] = useState(["Hello from Bearmax!"]);
 	const [buttonColors, setButtonColors] = useState({
-		calibrate: buttonLight,
-		play: buttonDark,
-		help: buttonDark,
-		engage: buttonLight,
+		calibrate: Colors.buttonLight,
+		play: Colors.buttonDark,
+		help: Colors.buttonDark,
+		engage: Colors.buttonLight,
 	});
 
 	const queueRef = useRef();
@@ -123,13 +119,13 @@ export default function Content({ navigation }) {
 					onPressIn={() =>
 						setButtonColors({
 							...buttonColors,
-							calibrate: buttonLightActive,
+							calibrate: Colors.buttonLightActive,
 						})
 					}
 					onPressOut={() =>
 						setButtonColors({
 							...buttonColors,
-							calibrate: buttonLight,
+							calibrate: Colors.buttonLight,
 						})
 					}
 				>
@@ -145,13 +141,13 @@ export default function Content({ navigation }) {
 					onPressIn={() =>
 						setButtonColors({
 							...buttonColors,
-							play: buttonDarkActive,
+							play: Colors.buttonDarkActive,
 						})
 					}
 					onPressOut={() =>
 						setButtonColors({
 							...buttonColors,
-							play: buttonDark,
+							play: Colors.buttonDark,
 						})
 					}
 				>
@@ -170,13 +166,13 @@ export default function Content({ navigation }) {
 					onPressIn={() =>
 						setButtonColors({
 							...buttonColors,
-							help: buttonDarkActive,
+							help: Colors.buttonDarkActive,
 						})
 					}
 					onPressOut={() =>
 						setButtonColors({
 							...buttonColors,
-							help: buttonDark,
+							help: Colors.buttonDark,
 						})
 					}
 				>
@@ -190,13 +186,13 @@ export default function Content({ navigation }) {
 					onPressIn={() =>
 						setButtonColors({
 							...buttonColors,
-							engage: buttonLightActive,
+							engage: Colors.buttonLightActive,
 						})
 					}
 					onPressOut={() =>
 						setButtonColors({
 							...buttonColors,
-							engage: buttonLight,
+							engage: Colors.buttonLight,
 						})
 					}
 				>
@@ -210,7 +206,7 @@ export default function Content({ navigation }) {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "#856A5d",
+		backgroundColor: Colors.brown,
 		alignItems: "center",
 	},
 	container2: {
@@ -223,7 +219,6 @@ const styles = StyleSheet.create({
 		marginTop: 50,
 	},
 	button: {
-		// backgroundColor: "#56b19c",
 		paddingVertical: 40,
 		width: 180,
 		height: 100,
@@ -232,7 +227,6 @@ const styles = StyleSheet.create({
 		marginRight: 8,
 	},
 	button1: {
-		// backgroundColor: "#35604e",
 		paddingVertical: 40,
 		height: 100,
 		width: 180,
@@ -245,7 +239,7 @@ const styles = StyleSheet.create({
 		lineHeight: 21,
 		fontWeight: "bold",
 		letterSpacing: 0.25,
-		color: "white",
+		color: Colors.text,
 		textAlign: "center",
 	},
 	assist: {
