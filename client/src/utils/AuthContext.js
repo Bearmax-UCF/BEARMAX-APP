@@ -1,6 +1,6 @@
-import * as SecureStore from "expo-secure-store";
 import React, { createContext, useEffect, useState } from "react";
 import Loading from "../Screens/Loading";
+import * as SecureStore from "expo-secure-store";
 
 export const AuthContext = createContext({});
 
@@ -10,6 +10,31 @@ User: {
     token: string
 }
 */
+
+function validUser(userData) {
+	return (
+		userData &&
+		typeof userData.id === "string" &&
+		typeof userData.token === "string"
+	);
+}
+
+async function saveUser(userData) {
+	if (validUser(userData)) {
+		await SecureStore.setItemAsync("id", userData.id);
+		await SecureStore.setItemAsync("token", userData.token);
+	}
+}
+
+async function getUser() {
+	const id = await SecureStore.getItemAsync("id");
+	const token = await SecureStore.getItemAsync("token");
+	if (!id || !token) return null;
+	return {
+		id,
+		token,
+	};
+}
 
 export const AuthProvider = ({ children }) => {
 	const [user, setUser] = useState(null);
@@ -33,7 +58,9 @@ export const AuthProvider = ({ children }) => {
 			console.log(data);
 
 			if (res.status === 200) {
-				setUser({ token: data.token, id: data.id });
+				const userData = { token: data.token, id: data.id };
+				setUser(userData);
+				await saveUser(userData);
 				return "";
 			}
 		} catch (err) {
@@ -64,12 +91,8 @@ export const AuthProvider = ({ children }) => {
 			const data = await res.json();
 			console.log(data);
 
-			if (res.status === 201) {
-				// TODO: Chain login
-				return "";
-			} else if (data.message) {
-				return data.message;
-			}
+			if (res.status === 201) return await loginFunction(email, password);
+			else if (data.message) return data.message;
 		} catch (err) {
 			console.error(err);
 		}
@@ -97,6 +120,7 @@ export const AuthProvider = ({ children }) => {
 
 			if (res.status === 200) {
 				setUser(null);
+				await saveUser({ id: "", token: "" });
 				return "";
 			}
 		} catch (err) {
@@ -106,9 +130,14 @@ export const AuthProvider = ({ children }) => {
 	};
 
 	useEffect(() => {
-		// TODO: Try to grab user from SecureStore
-		setLoading(false);
-	});
+		getUser()
+			.then((userData) => {
+				console.log("Retrieved: ", userData);
+				setUser(userData);
+			})
+			.catch((err) => console.error(err))
+			.finally(() => setLoading(false));
+	}, []);
 
 	if (loading) return <Loading />;
 

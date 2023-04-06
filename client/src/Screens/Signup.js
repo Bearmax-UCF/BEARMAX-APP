@@ -40,7 +40,7 @@ export default function Signup({ navigation }) {
 
 		const error = await signup(email, firstName, lastName, password);
 		if (error) toast("error", error);
-		else toast("success", "Successful Signup!");
+		else toast("success", "Success!");
 	};
 
 	return (

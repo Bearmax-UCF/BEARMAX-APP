@@ -31,7 +31,7 @@ export default function Login({ navigation }) {
 	const handleLogin = async () => {
 		const error = await login(email, password);
 		if (error) toast("error", error);
-		else toast("success", "Successful Login!");
+		else toast("success", "Success!");
 	};
 
 	return (
@@ -72,7 +72,7 @@ export default function Login({ navigation }) {
 				}
 				onPress={handleLogin}
 			>
-				<Text style={styles.text}>Login</Text>
+				<Text style={styles.text}>Log In</Text>
 			</Pressable>
 			<Pressable
 				style={{

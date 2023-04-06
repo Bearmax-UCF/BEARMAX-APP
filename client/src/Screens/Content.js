@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import {
 	StyleSheet,
 	Text,
@@ -7,9 +7,11 @@ import {
 	Pressable,
 	Vibration,
 } from "react-native";
+import Toast from "react-native-toast-message";
 
 import { io } from "socket.io-client";
 import { Colors } from "../utils/Colors";
+import { AuthContext } from "../utils/AuthContext";
 
 // TODO: Add logout button
 
@@ -25,11 +27,20 @@ export default function Content({ navigation }) {
 		engage: Colors.buttonLight,
 	});
 
+	const { logout } = useContext(AuthContext);
+
 	const queueRef = useRef();
 	queueRef.current = msgQueue;
 	const text = useRef();
 	text.current = currentText;
 	const count = useRef(0);
+
+	const toast = (type = "error", text1 = "") => {
+		Toast.show({
+			type,
+			text1,
+		});
+	};
 
 	// TODO: Make less gross and not on an interval
 	useEffect(() => {
@@ -101,6 +112,12 @@ export default function Content({ navigation }) {
 		setMsgQueue([...msgQueue, "Recalibrating!"]);
 		if (!socket) return;
 		socket.emit("recalibrate");
+	};
+
+	const handleLogout = async () => {
+		const error = await logout();
+		if (error) toast("error", error);
+		else toast("success", "Logged Out!");
 	};
 
 	return (
@@ -177,8 +194,12 @@ export default function Content({ navigation }) {
 							help: Colors.buttonDark,
 						})
 					}
+					onPress={() => {
+						// TODO
+						console.log("Not yet implemented!");
+					}}
 				>
-					<Text style={styles.text}>Help</Text>
+					<Text style={styles.text}>Engage</Text>
 				</Pressable>
 				<Pressable
 					style={{
@@ -197,8 +218,9 @@ export default function Content({ navigation }) {
 							engage: Colors.buttonLight,
 						})
 					}
+					onPress={handleLogout}
 				>
-					<Text style={styles.text}>Engage</Text>
+					<Text style={styles.text}>Log Out</Text>
 				</Pressable>
 			</View>
 		</View>
