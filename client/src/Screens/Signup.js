@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
+import Toast from "react-native-toast-message";
 import {
 	StyleSheet,
 	View,
@@ -8,8 +9,8 @@ import {
 	TextInput,
 } from "react-native";
 import { Colors } from "../utils/Colors";
+import { AuthContext } from "../utils/AuthContext";
 
-const PLACEHOLDER_COLOR = "#a6bdb3";
 
 export default function Signup({ navigation }) {
 	const [email, setEmail] = useState("");
@@ -22,37 +23,24 @@ export default function Signup({ navigation }) {
 		login: Colors.buttonDark,
 	});
 
-	const handleSignup = () => {
+	const { signup } = useContext(AuthContext);
+
+	const toast = (type = "error", text1 = "") => {
+		Toast.show({
+			type,
+			text1,
+		});
+	};
+
+	const handleSignup = async () => {
 		if (password !== confirmPassword) {
-			// TODO: Replace with error text
-			console.error("Passwords don't match!");
+			showError("Passwords don't match!");
 			return;
 		}
 
-		const URL_BASE = "https://carewithbearmax.com";
-
-		fetch(`${URL_BASE}/api/register`, {
-			method: "POST",
-			headers: {
-				Accept: "application/json",
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				email,
-				firstName,
-				lastName,
-				password,
-			}),
-		})
-			.then((res) => {
-				console.log(res);
-				return res.json();
-			})
-			.then((data) => {
-				console.log(data);
-				// TODO: Set user in AuthContext
-			})
-			.catch((err) => console.error(err));
+		const error = await signup(email, firstName, lastName, password);
+		if (error) toast("error", error);
+		else toast("success", "Successful Signup!");
 	};
 
 	return (
@@ -66,21 +54,21 @@ export default function Signup({ navigation }) {
 				onChangeText={setEmail}
 				value={email}
 				placeholder="Email"
-				placeholderTextColor={PLACEHOLDER_COLOR}
+				placeholderTextColor={Colors.placeholderText}
 			/>
 			<TextInput
 				style={styles.input}
 				onChangeText={setFirstName}
 				value={firstName}
 				placeholder="First Name"
-				placeholderTextColor={PLACEHOLDER_COLOR}
+				placeholderTextColor={Colors.placeholderText}
 			/>
 			<TextInput
 				style={styles.input}
 				onChangeText={setLastName}
 				value={lastName}
 				placeholder="Last Name"
-				placeholderTextColor={PLACEHOLDER_COLOR}
+				placeholderTextColor={Colors.placeholderText}
 			/>
 			<TextInput
 				secureTextEntry
@@ -88,7 +76,7 @@ export default function Signup({ navigation }) {
 				onChangeText={setPassword}
 				value={password}
 				placeholder="Password"
-				placeholderTextColor={PLACEHOLDER_COLOR}
+				placeholderTextColor={Colors.placeholderText}
 			/>
 			<TextInput
 				secureTextEntry
@@ -96,7 +84,7 @@ export default function Signup({ navigation }) {
 				onChangeText={setConfirmPassword}
 				value={confirmPassword}
 				placeholder="Confirm Password"
-				placeholderTextColor={PLACEHOLDER_COLOR}
+				placeholderTextColor={Colors.placeholderText}
 			/>
 			<Pressable
 				style={{
@@ -148,16 +136,16 @@ export default function Signup({ navigation }) {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "#856A5d",
+		backgroundColor: Colors.brown,
 		justifyContent: "center",
 		alignItems: "center",
 	},
 	input: {
 		width: 250,
-		color: "#FFFFFF",
+		color: Colors.text,
 		fontSize: 18,
-		backgroundColor: "#6C6F7D",
-		borderColor: "#000000",
+		backgroundColor: Colors.gray,
+		borderColor: Colors.border,
 		borderWidth: 2,
 		marginTop: 15,
 		padding: 5,
@@ -165,16 +153,14 @@ const styles = StyleSheet.create({
 		borderRadius: 5,
 	},
 	signup: {
-		backgroundColor: "#58B09C",
-		borderColor: "#000000",
+		borderColor: Colors.border,
 		borderWidth: 2,
 		marginTop: 45,
 		padding: 5,
 		borderRadius: 5,
 	},
 	login: {
-		backgroundColor: "#386150",
-		borderColor: "#000000",
+		borderColor: Colors.border,
 		borderWidth: 2,
 		marginTop: 15,
 		padding: 5,
@@ -182,6 +168,6 @@ const styles = StyleSheet.create({
 	},
 	text: {
 		fontSize: 24,
-		color: "#FFFFFF",
+		color: Colors.text,
 	},
 });

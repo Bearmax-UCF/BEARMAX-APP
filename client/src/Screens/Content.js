@@ -11,6 +11,8 @@ import {
 import { io } from "socket.io-client";
 import { Colors } from "../utils/Colors";
 
+// TODO: Add logout button
+
 export default function Content({ navigation }) {
 	const [gameActive, setGameActive] = useState(false);
 	const [currentText, setCurrentText] = useState("");

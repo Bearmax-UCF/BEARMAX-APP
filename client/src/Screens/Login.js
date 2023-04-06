@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import {
 	StyleSheet,
 	View,
@@ -8,8 +8,8 @@ import {
 	TextInput,
 } from "react-native";
 import { Colors } from "../utils/Colors";
-
-const PLACEHOLDER_COLOR = "#a6bdb3";
+import { AuthContext } from "../utils/AuthContext";
+import Toast from "react-native-toast-message";
 
 export default function Login({ navigation }) {
 	const [email, setEmail] = useState("");
@@ -19,26 +19,19 @@ export default function Login({ navigation }) {
 		signup: Colors.buttonDark,
 	});
 
-	const handleLogin = () => {
-		const URL_BASE = "https://carewithbearmax.com";
+	const { login } = useContext(AuthContext);
 
-		fetch(`${URL_BASE}/api/login`, {
-			method: "POST",
-			headers: {
-				Accept: "application/json",
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				email,
-				password,
-			}),
-		})
-			.then((res) => res.json())
-			.then((data) => {
-				console.log(data);
-                // TODO: Set user in AuthContext
-			})
-			.catch((err) => console.error(err));
+	const toast = (type = "error", text1 = "") => {
+		Toast.show({
+			type,
+			text1,
+		});
+	};
+
+	const handleLogin = async () => {
+		const error = await login(email, password);
+		if (error) toast("error", error);
+		else toast("success", "Successful Login!");
 	};
 
 	return (
@@ -52,7 +45,7 @@ export default function Login({ navigation }) {
 				onChangeText={setEmail}
 				value={email}
 				placeholder="Email"
-				placeholderTextColor={PLACEHOLDER_COLOR}
+				placeholderTextColor={Colors.placeholderText}
 			/>
 			<TextInput
 				secureTextEntry
@@ -60,8 +53,9 @@ export default function Login({ navigation }) {
 				onChangeText={setPassword}
 				value={password}
 				placeholder="Password"
-				placeholderTextColor={PLACEHOLDER_COLOR}
+				placeholderTextColor={Colors.placeholderText}
 			/>
+
 			<Pressable
 				style={{ ...styles.login, backgroundColor: buttonColors.login }}
 				onPressIn={() =>
@@ -104,10 +98,6 @@ export default function Login({ navigation }) {
 		</View>
 	);
 }
-
-// light: #58B09C
-// dark: #386150
-// gray: #6C6F7D
 
 const styles = StyleSheet.create({
 	container: {

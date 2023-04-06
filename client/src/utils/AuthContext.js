@@ -15,26 +15,94 @@ export const AuthProvider = ({ children }) => {
 	const [user, setUser] = useState(null);
 	const [loading, setLoading] = useState(true);
 
-	const loginFunction = async (username, password) => {
+	const loginFunction = async (email, password) => {
 		try {
-			// TODO: Get user through login
-			setUser(user);
-		} catch (error) {
-			console.error("Login failed:", error);
+			const res = await fetch(
+				`https://carewithbearmax.com/api/auth/login`,
+				{
+					method: "POST",
+					headers: {
+						Accept: "application/json",
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ email, password }),
+				}
+			);
+			console.log(res.status);
+			const data = await res.json();
+			console.log(data);
+
+			if (res.status === 200) {
+				setUser({ token: data.token, id: data.id });
+				return "";
+			}
+		} catch (err) {
+			console.error(err);
 		}
+		return "Invalid email or password!";
 	};
 
-	const signupFunction = async (username, firstName, lastName, password) => {
-		// TODO: Sign up user and setUser/setLoading
+	const signupFunction = async (email, firstName, lastName, password) => {
+		try {
+			const res = await fetch(
+				`https://carewithbearmax.com/api/auth/register`,
+				{
+					method: "POST",
+					headers: {
+						Accept: "application/json",
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						email,
+						firstName,
+						lastName,
+						password,
+					}),
+				}
+			);
+			console.log(res.status);
+			const data = await res.json();
+			console.log(data);
+
+			if (res.status === 201) {
+				// TODO: Chain login
+				return "";
+			} else if (data.message) {
+				return data.message;
+			}
+		} catch (err) {
+			console.error(err);
+		}
+		return "Signup failed!";
 	};
 
 	const logoutFunction = async () => {
+		if (!user) return "User not logged in!";
+
 		try {
-			setUser(null);
-			await auth().signOut();
-		} catch (error) {
-			console.error("Signout failed:", error);
+			const res = await fetch(
+				`https://carewithbearmax.com/api/auth/logout`,
+				{
+					method: "GET",
+					headers: {
+						Accept: "application/json",
+						"Content-Type": "application/json",
+						Authorization: "Bearer " + user.token,
+					},
+				}
+			);
+			console.log(res.status);
+			const data = await res.json();
+			console.log(data);
+
+			if (res.status === 200) {
+				setUser(null);
+				return "";
+			}
+		} catch (err) {
+			console.error(err);
 		}
+		return "Logout failed!";
 	};
 
 	useEffect(() => {
