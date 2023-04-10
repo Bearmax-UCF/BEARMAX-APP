@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useContext } from "react";
+import { useState, useEffect, useContext, useReducer } from "react";
 import {
 	StyleSheet,
 	Text,
@@ -6,18 +6,23 @@ import {
 	Image,
 	Pressable,
 	Vibration,
+	ScrollView,
 } from "react-native";
 import Toast from "react-native-toast-message";
-
+import Animated, { FadeInLeft } from "react-native-reanimated";
 import { io } from "socket.io-client";
+
 import { Colors } from "../utils/Colors";
 import { AuthContext } from "../utils/AuthContext";
 
 export default function Content({ navigation }) {
 	const [gameActive, setGameActive] = useState(false);
-	const [currentText, setCurrentText] = useState("");
 	const [socket, setSocket] = useState(null);
-	const [msgQueue, setMsgQueue] = useState(["Hello from Bearmax!"]);
+	const [msgHistory, updateMsgHistory] = useReducer((oldHistory, data) => {
+		Vibration.vibrate(1001);
+		return [toMsgObj(data.newMsg), ...oldHistory];
+	}, []);
+
 	const [buttonColors, setButtonColors] = useState({
 		calibrate: Colors.buttonLight,
 		play: Colors.buttonDark,
@@ -27,11 +32,9 @@ export default function Content({ navigation }) {
 
 	const { logout, user } = useContext(AuthContext);
 
-	const queueRef = useRef();
-	queueRef.current = msgQueue;
-	const text = useRef();
-	text.current = currentText;
-	const count = useRef(0);
+	function toMsgObj(msg) {
+		return { msg, key: new Date().getTime() };
+	}
 
 	const toast = (type = "error", text1 = "") => {
 		Toast.show({
@@ -40,45 +43,12 @@ export default function Content({ navigation }) {
 		});
 	};
 
-	// TODO: Make less gross and not on an interval
 	useEffect(() => {
-		const interval = setInterval(() => {
-			const LEAVE_DUR = 4; // sec
-			const currentQueue = queueRef.current;
+		updateMsgHistory({ newMsg: "Hello from Bearmax!" });
 
-			if (count.current > 0)
-				count.current = (count.current + 1) % (LEAVE_DUR + 1);
-			if (count.current == 0) {
-				if (currentQueue.length == 0) {
-					if (
-						text.current !== "" &&
-						text.current !== "Hello from Bearmax!"
-					)
-						setCurrentText("");
-					return;
-				}
-
-				setCurrentText(currentQueue[0]);
-				Vibration.vibrate(1001);
-				currentQueue.splice(0, 1);
-				setMsgQueue(currentQueue);
-				count.current++;
-			}
-		}, 1000);
-
-		return () => clearInterval(interval);
-	}, []);
-
-	useEffect(() => {
 		const URL = "https://carewithbearmax.com";
 
-		console.log(
-			"Attempting to connect to " +
-				URL +
-				" with token '" +
-				user.token +
-				"'"
-		);
+		console.log("Attempting socket connection to " + URL);
 		const newSocket = io(URL, {
 			query: {
 				userID: user.id,
@@ -91,8 +61,7 @@ export default function Content({ navigation }) {
 
 			newSocket.on("speak", (newMsg) => {
 				console.log("Received speech: " + newMsg);
-				const newQueue = [...queueRef.current, newMsg];
-				setMsgQueue(newQueue);
+				updateMsgHistory({ newMsg });
 			});
 		});
 
@@ -112,8 +81,8 @@ export default function Content({ navigation }) {
 	};
 
 	const calibrate = () => {
-		setMsgQueue([...msgQueue, "Recalibrating!"]);
 		if (!socket) return;
+		updateMsgHistory({ newMsg: "Recalibrating!" });
 		socket.emit("recalibrate");
 	};
 
@@ -129,7 +98,6 @@ export default function Content({ navigation }) {
 				style={styles.logo}
 				source={require("../../assets/face.png")}
 			/>
-			<Text style={styles.assist}>{currentText}</Text>
 
 			<View style={styles.container2}>
 				<Pressable
@@ -156,7 +124,7 @@ export default function Content({ navigation }) {
 
 				<Pressable
 					style={{
-						...styles.button1,
+						...styles.button,
 						backgroundColor: buttonColors.play,
 					}}
 					onPress={emotionGame}
@@ -182,7 +150,7 @@ export default function Content({ navigation }) {
 			<View style={styles.container2}>
 				<Pressable
 					style={{
-						...styles.button1,
+						...styles.button,
 						backgroundColor: buttonColors.help,
 					}}
 					onPressIn={() =>
@@ -226,61 +194,94 @@ export default function Content({ navigation }) {
 					<Text style={styles.text}>Log Out</Text>
 				</Pressable>
 			</View>
+
+			<View style={{ height: 250, width: "90%" }}>
+				<ScrollView
+					style={styles.msgHistory}
+					contentContainerStyle={{
+						flexGrow: 1,
+						paddingVertical: 5,
+					}}
+				>
+					{msgHistory.map((msgObj, i) => {
+						return (
+							<Animated.View
+								key={msgObj.key}
+								entering={FadeInLeft.duration(500)}
+							>
+								<Text
+									style={{
+										...styles.msg,
+										color:
+											i === 0
+												? Colors.text
+												: Colors.oldText,
+									}}
+									key={msgObj.key}
+								>
+									{msgObj.msg}
+								</Text>
+							</Animated.View>
+						);
+					})}
+				</ScrollView>
+			</View>
 		</View>
 	);
 }
 
 const styles = StyleSheet.create({
 	container: {
-		flex: 1,
 		backgroundColor: Colors.brown,
+		height: "100%",
+		width: "100%",
+		display: "flex",
+		justifyContent: "center",
 		alignItems: "center",
+		flexDirection: "column",
 	},
 	container2: {
+		width: "90%",
+		display: "flex",
 		flexDirection: "row",
-		marginTop: 20,
+		justifyContent: "center",
 	},
 	logo: {
-		width: 250,
-		height: 250,
-		marginTop: 50,
+		width: 200,
+		height: 200,
 	},
 	button: {
-		paddingVertical: 40,
-		width: 180,
-		height: 100,
+		width: "48%",
+		height: 90,
 		borderRadius: 4,
 		elevation: 3,
-		marginRight: 8,
-	},
-	button1: {
-		paddingVertical: 40,
-		height: 100,
-		width: 180,
-		borderRadius: 4,
-		elevation: 3,
-		marginRight: 8,
+		marginHorizontal: 2.5,
+		marginBottom: 5,
+		display: "flex",
+		justifyContent: "center",
+		alignItems: "center",
 	},
 	text: {
-		fontSize: 16,
+		fontSize: 20,
 		lineHeight: 21,
 		fontWeight: "bold",
 		letterSpacing: 0.25,
+		textAlign: "center",
 		color: Colors.text,
-		textAlign: "center",
 	},
-	assist: {
-		backgroundColor: "#60463b",
-		width: 365,
-		height: 50,
-		textAlign: "center",
-		paddingVertical: 15,
-		marginTop: 50,
-
+	msgHistory: {
+		backgroundColor: Colors.brownAccent,
+		width: "100%",
+		height: "100%",
+		marginTop: 40,
+		borderRadius: 4,
+	},
+	msg: {
 		fontSize: 16,
 		lineHeight: 21,
 		fontWeight: "bold",
 		letterSpacing: 0.25,
-		color: "white",
+		marginVertical: 15,
+		textAlign: "center",
 	},
 });

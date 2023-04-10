@@ -5,8 +5,10 @@ export const Colors = {
 	buttonDarkActive: "#2b4f40",
 	border: "#000000",
 	brown: "#856A5d",
+	brownAccent: "#60463b",
 	gray: "#6C6F7D",
 	placeholderText: "#a6bdb3",
 	text: "#FFFFFF",
+	oldText: "#949494",
 	errorText: "#fcbdbd",
 };
