@@ -54,10 +54,9 @@ export const AuthProvider = ({ children }) => {
 				}
 			);
 			console.log(res.status);
-			const data = await res.json();
-			console.log(data);
 
 			if (res.status === 200) {
+				const data = await res.json();
 				const userData = { token: data.token, id: data.id };
 				setUser(userData);
 				await saveUser(userData);
@@ -89,7 +88,6 @@ export const AuthProvider = ({ children }) => {
 			);
 			console.log(res.status);
 			const data = await res.json();
-			console.log(data);
 
 			if (res.status === 201) return await loginFunction(email, password);
 			else if (data.message) return data.message;
@@ -115,8 +113,6 @@ export const AuthProvider = ({ children }) => {
 				}
 			);
 			console.log(res.status);
-			const data = await res.json();
-			console.log(data);
 
 			if (res.status === 200) {
 				setUser(null);

@@ -13,8 +13,6 @@ import { io } from "socket.io-client";
 import { Colors } from "../utils/Colors";
 import { AuthContext } from "../utils/AuthContext";
 
-// TODO: Add logout button
-
 export default function Content({ navigation }) {
 	const [gameActive, setGameActive] = useState(false);
 	const [currentText, setCurrentText] = useState("");
@@ -27,7 +25,7 @@ export default function Content({ navigation }) {
 		engage: Colors.buttonLight,
 	});
 
-	const { logout } = useContext(AuthContext);
+	const { logout, user } = useContext(AuthContext);
 
 	const queueRef = useRef();
 	queueRef.current = msgQueue;
@@ -72,13 +70,18 @@ export default function Content({ navigation }) {
 	}, []);
 
 	useEffect(() => {
-		const URL = /*"http://137.184.110.53:443" ??*/ "http://localhost:8080";
+		const URL = "https://carewithbearmax.com";
 
-		// TODO: Get this working
-		console.log("Attempting to connect to " + URL);
+		console.log(
+			"Attempting to connect to " +
+				URL +
+				" with token '" +
+				user.token +
+				"'"
+		);
 		const newSocket = io(URL, {
-			extraHeaders: {
-				Authorization: "Bearer authorization_token_here",
+			query: {
+				userID: user.id,
 			},
 		});
 
@@ -103,8 +106,8 @@ export default function Content({ navigation }) {
 
 	const emotionGame = () => {
 		if (!socket) return;
-		if (gameActive) socket.emit("emotionGame", "stop");
-		else socket.emit("emotionGame", "start");
+		if (gameActive) socket.emit("emotionGame", "stop", user.id);
+		else socket.emit("emotionGame", "start", user.id);
 		setGameActive(!gameActive);
 	};
 
