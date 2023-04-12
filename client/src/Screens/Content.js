@@ -53,6 +53,9 @@ export default function Content({ navigation }) {
 			query: {
 				userID: user.id,
 			},
+			extraHeaders: {
+				Authorization: `Bearer ${user.token}`,
+			},
 		});
 
 		newSocket.on("connect", () => {
