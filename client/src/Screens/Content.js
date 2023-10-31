@@ -11,15 +11,31 @@ import {
 import Toast from "react-native-toast-message";
 import Animated, { FadeInLeft } from "react-native-reanimated";
 import { io } from "socket.io-client";
+import * as Speech from "expo-speech";
 
 import { Colors } from "../utils/Colors";
 import { AuthContext } from "../utils/AuthContext";
 
+// TODO: These voices are available on my singular android
+// Investigate voices available on iOS and support those too
+const VOICE_PRIORITY = [
+	"en-us-x-iog-network",
+	"en-us-x-iol-network",
+	"en-us-x-iog-local",
+	"en-us-x-iol-local",
+	"en-US-language",
+];
+
 export default function Content({ navigation }) {
+	const [voice, setVoice] = useState(undefined);
 	const [gameActive, setGameActive] = useState(false);
 	const [socket, setSocket] = useState(null);
 	const [msgHistory, updateMsgHistory] = useReducer((oldHistory, data) => {
 		Vibration.vibrate(1001);
+		// Speech has an easier time pronouncing if we split it up :)
+		Speech.speak(data.newMsg, {
+			voice: voice ? voice.identifier : voice,
+		});
 		return [toMsgObj(data.newMsg), ...oldHistory];
 	}, []);
 
@@ -44,10 +60,7 @@ export default function Content({ navigation }) {
 	};
 
 	useEffect(() => {
-		updateMsgHistory({ newMsg: "Hello from Bearmax!" });
-
 		const URL = "https://carewithbearmax.com";
-
 		console.log("Attempting socket connection to " + URL);
 		const newSocket = io(URL, {
 			query: {
@@ -75,6 +88,34 @@ export default function Content({ navigation }) {
 			newSocket.close();
 		};
 	}, [navigation]);
+
+	useEffect(() => {
+		if (voice) updateMsgHistory({ newMsg: "Hello from Bearmax!" });
+	}, [voice]);
+
+	useEffect(() => {
+		const GetVoices = async () => {
+			let availableVoices;
+			// Doesn't work on first call, so keep trying until we get a list of usable voices
+			availableVoices = await Speech.getAvailableVoicesAsync();
+			while (availableVoices.length === 0)
+				availableVoices = await Speech.getAvailableVoicesAsync();
+
+			// Check if we have access to the voices we want, in order
+			for (let voiceIdentifier of VOICE_PRIORITY) {
+				for (let thisVoice of availableVoices) {
+					if (thisVoice.identifier === voiceIdentifier) {
+						console.log(
+							"Set tts voice to be " + thisVoice.identifier
+						);
+						setVoice(thisVoice);
+						return;
+					}
+				}
+			}
+		};
+		GetVoices();
+	}, []);
 
 	const emotionGame = () => {
 		if (!socket) return;

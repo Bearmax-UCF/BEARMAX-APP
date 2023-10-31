@@ -1,29 +1,40 @@
 {
-	"expo": {
-		"name": "client",
-		"slug": "client",
-		"version": "1.0.0",
-		"orientation": "portrait",
-		"icon": "./assets/icon.png",
-		"userInterfaceStyle": "light",
-		"splash": {
-			"image": "./assets/splash.png",
-			"resizeMode": "contain",
-			"backgroundColor": "#ffffff"
-		},
-		"assetBundlePatterns": ["**/*"],
-		"ios": {
-			"supportsTablet": true
-		},
-		"android": {
-			"adaptiveIcon": {
-				"foregroundImage": "./assets/adaptive-icon.png",
-				"backgroundColor": "#ffffff"
-			},
-			"permissions": ["VIBRATE"]
-		},
-		"web": {
-			"favicon": "./assets/face.png"
-		}
-	}
+  "expo": {
+    "name": "Bearmax",
+    "slug": "bearmax",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/face.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/full.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#3e3138"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "icon": "./assets/face.png",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/face.png",
+        "backgroundColor": "#856a5d"
+      },
+      "permissions": [
+        "VIBRATE"
+      ],
+      "package": "com.bearmax.team"
+    },
+    "web": {
+      "favicon": "./assets/face.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "25d71693-55c6-4ece-b717-6358c0b2b866"
+      }
+    }
+  }
 }

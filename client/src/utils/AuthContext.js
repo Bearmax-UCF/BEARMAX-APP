@@ -89,7 +89,7 @@ export const AuthProvider = ({ children }) => {
 			console.log(res.status);
 			const data = await res.json();
 
-			if (res.status === 201) return await loginFunction(email, password);
+			if (res.status === 201) return "";
 			else if (data.message) return data.message;
 		} catch (err) {
 			console.error(err);
@@ -125,14 +125,42 @@ export const AuthProvider = ({ children }) => {
 		return "Logout failed!";
 	};
 
+	const tokenIsValid = async (testToken) => {
+		if (!testToken) return false;
+
+		try {
+			const res = await fetch(
+				`https://carewithbearmax.com/api/users/me`,
+				{
+					method: "GET",
+					headers: {
+						Accept: "application/json",
+						"Content-Type": "application/json",
+						Authorization: "Bearer " + testToken,
+					},
+				}
+			);
+			console.log("Token check returned status " + res.status);
+			return res.status === 200;
+		} catch (err) {
+			console.error(err);
+		}
+		return false;
+	};
+
 	useEffect(() => {
-		getUser()
-			.then((userData) => {
-				console.log("Retrieved: ", userData);
-				setUser(userData);
-			})
-			.catch((err) => console.error(err))
-			.finally(() => setLoading(false));
+		async function test() {
+			const userData = await getUser();
+			console.log("Retrieved: ", userData);
+
+			if (userData) {
+				const tokenStillValid = await tokenIsValid(userData.token);
+				if (tokenStillValid) setUser(userData);
+			}
+
+			setLoading(false);
+		}
+		test();
 	}, []);
 
 	if (loading) return <Loading />;

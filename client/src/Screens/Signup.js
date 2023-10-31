@@ -11,7 +11,6 @@ import {
 import { Colors } from "../utils/Colors";
 import { AuthContext } from "../utils/AuthContext";
 
-
 export default function Signup({ navigation }) {
 	const [email, setEmail] = useState("");
 	const [firstName, setFirstName] = useState("");
@@ -40,7 +39,10 @@ export default function Signup({ navigation }) {
 
 		const error = await signup(email, firstName, lastName, password);
 		if (error) toast("error", error);
-		else toast("success", "Success!");
+		else {
+			navigation.navigate("Login");
+			toast("success", "Success! Please log in.");
+		}
 	};
 
 	return (
